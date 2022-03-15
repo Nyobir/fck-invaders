@@ -1,0 +1,313 @@
+#!/usr/bin/env sh
+
+# This program runs a shell command/script over SSH in a remote host or list of hosts
+# Copyright (C) 2017  Yuri Escalianti   (https://github.com/yuriescl/runoverssh)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# Script name
+script_name=`basename "$0"`
+script_alias=`basename -s .sh "$0"`
+
+# Print help
+print_help() {
+  error "Usage: $script_name [OPTIONS] USERNAME COMMAND HOSTS..."
+  error "Options:"
+  error ""
+  error "   -g, --globalpw             Prompt a global password for all connections"
+  error "   -s, --script FILE          Read commands from a script file, disables"
+  error "                               the default COMMAND argument"
+  error "   -r, --hostsfile FILE       Read the list of hosts from a file (one host"
+  error "                               per line), disables the default HOSTS argument"
+  error "   -a, --args ARGS            Arguments (in a single string) to be passed to"
+  error "                               the script file."
+  error "   -q, --quiet                Disable all screen output, except for password"
+  error "                               prompts. If logfile is set, output is written"
+  error "                               there"
+  error "   -v, --verbose              Print verbose messages"
+  error "   --shell SHELL              Remote shell to be used. Supported values:"
+  error "                               sh, bash"
+  error "                              default: bash"
+  error "   --shellflags FLAGS         Remote shell flags"
+  error "                              default: ''"
+  error "   --sshflags FLAGS           Local SSH flags"
+  error "                              default:  -o ConnectTimeout=5"
+  error "                                        -o StrictHostKeyChecking=no"
+  error "                                        -o UserKnownHostsFile=/dev/null"
+  error "   --logfile FILE             Append SSH output to a file"
+  error ""
+  error "Examples:"
+  error ""
+  error "  runoverssh root 'systemctl restart apache2' server1 server2"
+  error ""
+  error "  runoverssh --logfile runoverssh.log --quiet --globalpw root 'reboot' host1 host2 host3"
+  error ""
+  error "  runoverssh remoteuser 'cd git-project && git status' devmachine"
+  error ""
+  error "  runoverssh --script myscript.sh --hostsfile hostlist remoteuser"
+  error ""
+  error "  runoverssh --script myscript.sh --args '-q -s -t' --hostsfile hostlist remoteuser"
+  error ""
+  error "Bugs or Requests: https://github.com/yuriescl/runoverssh/issues"
+}
+
+error() {
+  >&2 echo "$@"
+}
+
+read_password() {
+  printf "$1"
+  stty -echo
+  IFS= read -r password
+  stty echo
+  printf '\n'
+}
+
+# Standard parameters
+username=""
+remote_command=""
+
+# Optional parameters
+scriptfile=""  # -s , --script
+args="" # -a , --args
+hostsfile=""  # -r , --hostsfile
+logfile="/dev/null"  # --logfile
+globalpw=""  # -g, --globalpw
+shell="bash"
+shellflags=""  # --shellflags
+sshflags="-o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"   # --sshflags
+quiet="" # -q , --quiet
+verbose=""
+
+if [ "$1" = "--help" ]; then
+  print_help
+  exit 0
+else
+  # Check parameter count
+  if [ $# -lt 3 ]; then
+    error "Usage: $script_name [OPTIONS] USERNAME COMMAND HOSTS..."
+    error "Use '$script_name --help' for command help and examples."
+    exit 1
+  fi
+fi
+
+# Read parameters
+
+is_first=""
+waiting_option=""
+for parameter do
+  if [ -n "$is_first" ] && [ -n "$waiting_option" ]; then
+
+    # Assign the option
+    case "$waiting_option" in
+      "-s" | "--script")
+        scriptfile="$parameter"
+        ;;
+      "-a" | "--args")
+        args="$parameter"
+        ;;
+      "-r" | "--hostsfile")
+        hostsfile="$parameter"
+        ;;
+      "--logfile")
+        logfile="$parameter"
+        ;;
+      "--shell")
+        shell="$parameter"
+        ;;
+      "--shellflags")
+        shellflags="$parameter"
+        ;;
+      "--sshflags")
+        sshflags="$parameter"
+        ;;
+    esac
+    waiting_option=""
+  
+  else  # first or not waiting option
+    is_first="no"
+    case "$parameter" in
+      "-s" | "--script" | "-a" | "--args" | "-r" | "--hostsfile" | "--logfile" | "--sshflags" | "--shellflags" | "--shell")
+        waiting_option="$parameter"
+        ;;
+      "-g" | "--globalpw")
+        globalpw="true"
+        ;;
+      "-q" | "--quiet")
+        quiet="true"
+        ;;
+      "-v" | "--verbose")
+        verbose="true"
+        ;;
+      *)
+        case "$parameter" in
+          "--"*)
+            error "Error: invalid option '$parameter'. Exiting."
+            exit 1 ;;
+          "-"*)
+            error "Error: invalid option '$parameter'. Exiting."
+            exit 1 ;;
+          *) ;;
+        esac
+
+        # Read the remaining arguments
+        if [ -z "$username" ]; then
+          username=${parameter}
+        else
+          if [ -z "$scriptfile" ] && [ -z "$remote_command" ]; then
+            remote_command="$parameter"
+          else
+            hosts="${hosts:+${hosts} }${parameter}" # append to string
+          fi #command
+        fi #username
+        waiting_option=""
+    esac
+  
+  fi  # ! is_first and is waiting
+done
+
+if [ -n "$verbose" ]; then
+  echo "username: $username"
+  echo "remote_command: $remote_command"
+  echo "scriptfile: $scriptfile"
+  echo "args: $args"
+  echo "hostsfile: $hostsfile"
+  echo "logfile: $logfile"
+  echo -n "globalpw: "
+  if [ -n "$globalpw" ]; then echo yes; else echo no; fi
+  echo "sshflags: $sshflags"
+  echo "shellflags: $shellflags"
+  echo -n "quiet: "
+  if [ -n "$quiet" ]; then echo yes; else echo no; fi
+  echo -n "verbose: "
+  if [ -n "$verbose" ]; then echo yes; else echo no; fi
+fi
+
+
+# Check parameter and argument consistency
+
+if [ -n "$waiting_option" ]; then
+  error "Error: missing value for '$waiting_option' parameter. Exiting."
+  exit 1
+fi
+
+if [ -z "$username" ]; then
+  error "Error: please specify the username to be used in SSH. Exiting."
+  exit 1
+fi
+
+if [ -z "$scriptfile" ] && [ -z "$remote_command" ] ; then
+  error "Error: please specify the command or script file ('-s') to be executed over SSH. Exiting."
+  exit 1
+fi
+if [ -n "$scriptfile" ] && [ -n "$remote_command" ] ; then
+  error "Error: parameter conflict: do not put a command as argument when also specifying a script as parameter. Exiting."
+  exit 1
+fi
+
+if [ -n "$args" ] && [ -z "$scriptfile" ]; then
+  error "Error: arguments specified but no script file provided. Exiting."
+  exit 1
+fi
+
+if [ -z "$hostsfile" ] && [ -z "$hosts" ]; then
+  error "Error: please specify at least one target host or use the '--hostsfile' option. Exiting."
+  exit 1
+fi
+if [ -n "$hostsfile" ] && [ -n "$hosts" ]; then
+  error "Error: parameter conflict: do not list hosts as arguments when also specifying a hostsfile as parameter. Exiting."
+  exit 1
+fi
+
+# Check file readability (if specified to read from a file)
+if [ -n "$hostsfile" ] && [ ! -r "$hostsfile" ]; then
+  error "Error: can't read the hosts file '${hostsfile}'. Exiting."
+  exit 1
+fi
+if [ -n "$scriptfile" ] && [ ! -r "$scriptfile" ]; then
+  error "Error: can't read the script file '${scriptfile}'. Exiting."
+  exit 1
+fi
+
+if [ "$shell" != "sh" ] && [ "$shell" != "bash" ]; then
+    error "Error: shell '$shell' is not supported"
+    exit 1
+fi
+
+# Check log file
+if [ -d "$logfile" ]; then
+  error "Error: log file '$logfile' is a directory. Exiting."
+  exit 1
+fi
+
+# Check dependencies
+command -v "ssh" >/dev/null 2>&1 || { error "Error: program 'ssh' not found. Exiting."; exit 1; }
+
+if [ -n "$globalpw" ]; then
+  command -v "sshpass" >/dev/null 2>&1 || { error "Error: program 'sshpass' is required when using the '--globalpw' option. Exiting."; exit 1; }
+fi
+
+
+if [ -n "$globalpw" ]; then
+  read_password "Global password for user ${username}: "
+fi
+
+if [ -n "$hostsfile" ]; then
+  while read host; do
+    hosts="${hosts:+${hosts} }${host}" # append to string
+  done<"$hostsfile"
+fi
+
+
+# Connect to each host and execute the command/script
+if [ -z "$globalpw" ]; then
+  for host in ""$hosts""; do
+    if [ -z "$quiet" ]; then echo "Connecting as ${username}@${host}..."; fi
+    if [ -n "$scriptfile" ]; then
+      if [ -n "$quiet" ]; then
+        ssh ${sshflags} ${username}@${host} "${shell} ${shellflags} -s" < "${scriptfile}" "${args}" >> /dev/null 2>&1
+      else
+        ssh ${sshflags} ${username}@${host} "${shell} ${shellflags} -s" < "${scriptfile}" "${args}" 2>&1 | tee -a "${logfile}"
+      fi
+    else
+      if [ -n "$quiet" ]; then
+        ssh ${sshflags} ${username}@${host} "${shell} ${shellflags} -c \"${remote_command}\"" >> /dev/null 2>&1
+      else
+        ssh ${sshflags} ${username}@${host} "${shell} ${shellflags} -c \"${remote_command}\"" 2>&1 | tee -a "${logfile}"
+      fi
+    fi
+  done
+else
+  for host in ""$hosts""; do
+    if [ -z "$quiet" ]; then echo "Connecting as ${username}@${host}..."; fi
+    if [ -n "$scriptfile" ]; then
+      if [ -n "$quiet" ]; then
+        sshpass -p "${password}" ssh ${sshflags} ${username}@${host} "${shell} ${shellflags} -s" < "${scriptfile}" "${args}" >> /dev/null 2>&1
+      else
+        sshpass -p "${password}" ssh ${sshflags} ${username}@${host} "${shell} ${shellflags} -s" < "${scriptfile}" "${args}" 2>&1 | tee -a "${logfile}"
+      fi
+    else
+      if [ -n "$quiet" ]; then
+        sshpass -p "${password}" ssh ${sshflags} ${username}@${host} "${shell} ${shellflags} -c \"${remote_command}\"" >> /dev/null 2>&1
+      else
+        sshpass -p "${password}" ssh ${sshflags} ${username}@${host} "${shell} ${shellflags} -c \"${remote_command}\"" 2>&1 | tee -a "${logfile}"
+      fi
+    fi
+  done
+fi
+
+exit 0
+
+# end.
