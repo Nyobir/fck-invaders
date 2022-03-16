@@ -22,7 +22,7 @@ do
      doctl compute droplet create \
        --image ubuntu-20-04-x64 \
        --size s-1vcpu-1gb \
-       --user-data-file install-attacker.sh \
+       --user-data-file attacker-setup.sh \
        --region $REGION \
        --ssh-keys "${KEYS}" \
        "killer-bee-${REGION}-${HASH}"
