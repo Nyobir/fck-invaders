@@ -27,7 +27,7 @@
 <img width="263" alt="image" src="https://user-images.githubusercontent.com/68959321/159116022-0721fe1a-8811-4ca1-aa51-ab51a9bf7dfe.png">
 <img width="269" alt="image" src="https://user-images.githubusercontent.com/68959321/159116027-ecd28ad6-033c-43a9-8aaa-f8b7a6212114.png">
 
- 9. Copy to ripplers hosts
+ 9. Copy to ip adresses of droplets to hosts.txt file
 <img width="265" alt="image" src="https://user-images.githubusercontent.com/68959321/159116051-36028eb6-53aa-43a1-9e0d-7ca9cfda70d0.png">
 <img width="254" alt="image" src="https://user-images.githubusercontent.com/68959321/159116058-04a12e6d-12f4-4250-ad3f-cfb2a89e751f.png">
 <img width="259" alt="image" src="https://user-images.githubusercontent.com/68959321/159116063-d3ac032e-3715-400f-bd8f-b69f589fceb7.png">
