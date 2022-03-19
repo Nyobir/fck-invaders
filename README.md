@@ -19,7 +19,7 @@
 
  6. Go to fck-invaders folder
  
- 7. Run sh botnet.sh 
+ 7. Run `bash botnet.sh`
  <img width="448" alt="image" src="https://user-images.githubusercontent.com/68959321/159115968-8f59d9df-1ff8-4ba5-9912-6b58ed06ee56.png">
 
  8. Install two droplets
