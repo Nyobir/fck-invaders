@@ -1,6 +1,6 @@
 # fck-invaders
- 👾SETUP👾
- 1. Registrate an account in https://cloud.digitalocean.com/
+ 👾 SETUP 👾
+ 1. Register an account in https://cloud.digitalocean.com/
 
  2. Create one dropplet with ssh key access 
  <img width="101" alt="image" src="https://user-images.githubusercontent.com/68959321/159115580-df82146c-7d47-490e-8abf-4000607a7831.png">
