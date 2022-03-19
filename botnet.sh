@@ -7,7 +7,7 @@ SCRIPTNAME="$0"
 cd $SCRIPTPATH
 git fetch
 
-[[ -n $(git diff --name-only origin/master | grep $SCRIPTNAME) ]] && {
+[[ -n $(git diff --name-only origin/master) ]] && {
     echo "Found a new version of me, updating myself..."
     git checkout master
     git pull --force
