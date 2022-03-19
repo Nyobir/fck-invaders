@@ -5,9 +5,9 @@
  2. Create one dropplet with ssh key access 
  <img width="101" alt="image" src="https://user-images.githubusercontent.com/68959321/159115580-df82146c-7d47-490e-8abf-4000607a7831.png">
 
- 3. Clone https://github.com/Nyobir/fck-invaders to yours computer
+ 3. Clone https://github.com/Nyobir/fck-invaders to your computer
  
- 4. Install https://github.com/digitalocean/doctl to yours computer
+ 4. Install https://github.com/digitalocean/doctl to your computer
  
  5. Install "dialog" to yours computer
   
