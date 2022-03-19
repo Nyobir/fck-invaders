@@ -9,7 +9,7 @@
  
  4. Install https://github.com/digitalocean/doctl to your computer
  
- 5. Install "dialog" to yours computer
+ 5. Install "dialog" to your computer
   
     - for ubuntu package is pre-installed
 
