@@ -11,11 +11,7 @@
  
  5. Install "dialog" to yours computer
   
-    - for ubuntu:
-    
-       $ sudo apt-get update 
-       
-       $ sudo apt-get install l dialog
+    - for ubuntu package is pre-installed
 
     - for mac:
     
