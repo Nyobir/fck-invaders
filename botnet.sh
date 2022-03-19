@@ -1,5 +1,25 @@
 #!/bin/bash
 
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+SCRIPTNAME="$0"
+
+cd $SCRIPTPATH
+git fetch
+
+[[ -n $(git diff --name-only origin/master | grep $SCRIPTNAME) ]] && {
+    echo "Found a new version of me, updating myself..."
+    git checkout master
+    git pull --force
+    echo "Running the new version..."
+    exec "$SCRIPTNAME"
+
+    # Now exit this old instance
+    exit 1
+}
+echo "Already the latest version."
+
+
 SCRIPT_DIR=$(dirname "$0")
 export SCRIPT_DIR
 touch -a "$SCRIPT_DIR/hosts.txt"

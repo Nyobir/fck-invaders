@@ -37,6 +37,7 @@ case $MENU_OPTION in
       doctl compute droplet list --format=PublicIPv4 --no-header > "$SCRIPT_DIR/hosts.txt"
       echo "Ip addresses was successfully rewritten in hosts.txt"
       echo "Starting hosts setup..."
+      sleep 5
       bash "$SCRIPT_DIR/setup_hosts.sh"
       dialog --title "Ok" --msgbox "Droplets is ready to use!\nRoast this fuckers!" 6 50
       ;;
