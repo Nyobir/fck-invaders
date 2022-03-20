@@ -4,7 +4,7 @@ SCRIPT_DIR=$(dirname "$0")
 export SCRIPT_DIR
 
 cd $SCRIPT_DIR
-#git fetch
+git fetch
 
 [[ -n $(git log ..origin/master) ]] && {
     echo "Found a new version of me, updating myself..."
