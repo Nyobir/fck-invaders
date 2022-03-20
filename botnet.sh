@@ -42,7 +42,7 @@ while : ; do
         MENU_OPTION=$(dialog --title 'Bandwidth monitoring' --menu --stdout "Choose host to monitor:" 15 55 ${#options[@]} "${options[@]}")
         HOST=${options[$MENU_OPTION*2-1]}
 
-        ssh -t "root@$HOST" 'python3 MHDDoS/start.py TOOLS'
+        (echo -e "DSTAT" && cat) | ssh -t "root@$HOST" 'python3 MHDDoS/start.py TOOLS'
         break
         ;;
 
@@ -55,28 +55,32 @@ while : ; do
             output+="$host\n$processes\n\n"
         done < "$SCRIPT_DIR/hosts.txt"
         printf "$output" > "$SCRIPT_DIR/output.txt"
-        dialog --title "Hosts and their active attacks" --textbox "$SCRIPT_DIR/output.txt" 30 50
+        dialog --title 'Hosts and their active attacks' --editbox "$SCRIPT_DIR/output.txt" --stdout 35 70
 
         continue
         ;;
 
     4) #Stop all botnet attacks
         bash "$SCRIPT_DIR/runoverssh" root "killall screen" --hostsfile "$SCRIPT_DIR/hosts.txt"
-        break
+        continue
         ;;
 
 
     5) #Stop certain host/ip attack in botnet
-        TARGET=$(bash "${SCRIPT_DIR}/menus/url.sh")
-        bash "$SCRIPT_DIR/runoverssh" root "pkill -f '$TARGET'" --hostsfile "$SCRIPT_DIR/hosts.txt"
+      clear
+      echo "Currently not available, causes fatal error"
+      sleep 4
+#        target=$(bash "${SCRIPT_DIR}/menus/url.sh")
+#        if [ -n "$target" ]; then
+#            bash "$SCRIPT_DIR/runoverssh" root "pkill -f $TARGET" --hostsfile "$SCRIPT_DIR/hosts.txt"
+#        fi
 
-        break
+        continue
         ;;
 
     6) #Setup SSH hosts
         bash "$SCRIPT_DIR/setup_hosts.sh"
-
-        break
+        continue
         ;;
 
     7)
@@ -97,6 +101,9 @@ while : ; do
         ;;
 
     8)
+        break
+        ;;
+    *)
         break
         ;;
 
