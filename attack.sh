@@ -6,8 +6,9 @@ case $MENU_OPTION in
     ATTACK_TYPE=$(bash "${SCRIPT_DIR}/menus/l7.sh")
     targets=$(dialog --title 'Enter hosts or ip addresses with ports split by newline' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70)
     printf "$targets" > "$SCRIPT_DIR/targets.txt"
+    printf "\n" >> "$SCRIPT_DIR/targets.txt"
     targets_num=$(cat "$SCRIPT_DIR/targets.txt" | wc -l)
-    threads=$(( 2000 / targets_num ))
+    threads=$(( 1000 / targets_num ))
     SOCKS_TYPE=$(bash "${SCRIPT_DIR}/menus/socks_type.sh")
     PROXY_FILE=$(bash "${SCRIPT_DIR}/menus/proxy_file.sh")
     RPS=$(bash "${SCRIPT_DIR}/menus/rps.sh")
@@ -29,8 +30,9 @@ case $MENU_OPTION in
     ATTACK_TYPE=$(bash "${SCRIPT_DIR}/menus/l4.sh")
     targets=$(dialog --title 'Enter hosts or ip addresses with ports split by newline' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70)
     printf "$targets" > "$SCRIPT_DIR/targets.txt"
+    printf "\n" >> "$SCRIPT_DIR/targets.txt"
     targets_num=$(cat "$SCRIPT_DIR/targets.txt" | wc -l)
-    threads=$(( 2000 / targets_num ))
+    threads=$(( 1000 / targets_num ))
 
     DURATION=$(bash "${SCRIPT_DIR}/menus/duration.sh")
     SOCKS_TYPE=$(bash "${SCRIPT_DIR}/menus/socks_type.sh")
