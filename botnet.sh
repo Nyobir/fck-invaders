@@ -48,13 +48,12 @@ while : ; do
 
     3) #Show current attacks
         echo "Loading..."
-        output=''
+        printf '' > "$SCRIPT_DIR/output.txt"
         while read -r host
         do
-            processes=$(ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n "root@$host" "ps -aux | grep start.py | grep -v grep | grep -vi screen" | awk '{print $13, $14}' | sed 's/^/    /')
-            output+="$host\n$processes\n\n"
+             printf "%s\n%s\n\n" "$host" "$(ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n "root@$host" "ps -aux | grep start.py | grep -v grep | grep -vi screen" | awk '{print $13, $14}' | sed 's/^/    /')" >> "$SCRIPT_DIR/output.txt" &
         done < "$SCRIPT_DIR/hosts.txt"
-        printf "$output" > "$SCRIPT_DIR/output.txt"
+        wait
         dialog --title 'Hosts and their active attacks' --editbox "$SCRIPT_DIR/output.txt" --stdout 35 70
 
         continue
