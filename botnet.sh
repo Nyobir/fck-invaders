@@ -60,7 +60,8 @@ while : ; do
         ;;
 
     4) #Stop all botnet attacks
-        bash "$SCRIPT_DIR/runoverssh" root "killall screen" --hostsfile "$SCRIPT_DIR/hosts.txt"
+        bash "$SCRIPT_DIR/rpce.sh" "killall screen"
+        dialog --title "Ok" --msgbox "Attacks was killed!\nAnd russians should be!" 6 50
         continue
         ;;
 
@@ -69,7 +70,8 @@ while : ; do
         clear
         target=$(bash "${SCRIPT_DIR}/menus/url.sh")
         if [ -n "$target" ]; then
-            bash "$SCRIPT_DIR/runoverssh" root "pkill -f $target" --hostsfile "$SCRIPT_DIR/hosts.txt"
+            bash "$SCRIPT_DIR/rpce.sh" "pkill -f $target"
+            dialog --title "Ok" --msgbox "Attacks was killed!\nAnd russians should be!" 6 50
         fi
 
         continue

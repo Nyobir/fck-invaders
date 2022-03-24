@@ -39,7 +39,6 @@ case $MENU_OPTION in
       echo "Starting hosts setup..."
       sleep 5
       bash "$SCRIPT_DIR/setup_hosts.sh"
-      dialog --title "Ok" --msgbox "Droplets is ready to use!\nRoast this fuckers!" 6 50
       ;;
 
   2)
