@@ -4,7 +4,17 @@ case $MENU_OPTION in
 
 1)
     ATTACK_TYPE=$(bash "${SCRIPT_DIR}/menus/l7.sh")
-    targets=$(dialog --title 'Enter hosts or ip addresses with ports split by newline' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70)
+
+    while : ; do
+        targets=$(dialog --title 'Enter hosts or ip addresses with ports split by newline' --extra-button --extra-label 'Clear all' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70)
+        exit_code=$?
+        if [[ $exit_code -eq 3 ]]; then
+            rm -f "$SCRIPT_DIR/targets.txt" && touch "$SCRIPT_DIR/targets.txt"
+        fi
+        [[ $exit_code -eq 1 ]] && exit
+        [[ $exit_code -eq 0 ]] && break
+    done
+
     printf "$targets" > "$SCRIPT_DIR/targets.txt"
     printf "\n" >> "$SCRIPT_DIR/targets.txt"
     targets_num=$(cat "$SCRIPT_DIR/targets.txt" | wc -l)
@@ -32,7 +42,17 @@ case $MENU_OPTION in
 
 2)
     ATTACK_TYPE=$(bash "${SCRIPT_DIR}/menus/l4.sh")
-    targets=$(dialog --title 'Enter hosts or ip addresses with ports split by newline' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70)
+
+     while : ; do
+        targets=$(dialog --title 'Enter hosts or ip addresses with ports split by newline' --extra-button --extra-label 'Clear all' --editbox "$SCRIPT_DIR/targets.txt" --stdout 35 70)
+        exit_code=$?
+        if [[ $exit_code -eq 3 ]]; then
+            rm -f "$SCRIPT_DIR/targets.txt" && touch "$SCRIPT_DIR/targets.txt"
+        fi
+        [[ $exit_code -eq 1 ]] && exit
+        [[ $exit_code -eq 0 ]] && break
+    done
+
     printf "$targets" > "$SCRIPT_DIR/targets.txt"
     printf "\n" >> "$SCRIPT_DIR/targets.txt"
     targets_num=$(cat "$SCRIPT_DIR/targets.txt" | wc -l)
