@@ -51,7 +51,7 @@ while : ; do
         MENU_OPTION=$(dialog --title 'Bandwidth monitoring' --menu --stdout "Choose host to monitor:" 15 55 ${#options[@]} "${options[@]}")
         HOST=${options[$MENU_OPTION*2-1]}
 
-        (echo -e "DSTAT" && cat) | ssh -t -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" 'python3 MHDDoS/start.py TOOLS'
+        (echo -e "DSTAT" && cat) | ssh -t -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" 'python3 ~/MHDDoS/start.py TOOLS'
         break
         ;;
 
