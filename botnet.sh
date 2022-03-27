@@ -32,7 +32,7 @@ export DIALOGRC="$SCRIPT_DIR/.dialogrc"
 while : ; do
     MENU_OPTION=$(dialog --title 'Botnet' --menu --stdout "Before the start populate your hosts.txt file!" 20 65 9  \
     1 'Botnet attack on host' 2 'Bandwidth monitoring' 3 'Show current attacks' 4 'Stop all botnet attacks' \
-    5 'Stop certain host/ip attack in botnet' 6 'Setup SSH hosts' 7 'Change default SSH user' 8 'Cloud providers' 9 'Exit')
+    5 'Stop certain host/ip attack in botnet' 6 'Setup/Update SSH hosts' 7 'Change default SSH user' 8 'Cloud providers' 9 'Exit')
 
     case $MENU_OPTION in
 
