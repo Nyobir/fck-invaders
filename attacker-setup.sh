@@ -15,15 +15,8 @@ else
 fi
 
 # Updating/Installing DDoS utility
-if [[ -d ./MHDDoS ]]; then
-    cd MHDDoS
-    git checkout main
-    git pull --force
-else
-    git clone https://github.com/Nyobir/MHDDoS.git;
-fi
-# Clearing proxies list
-rm -rf ./MHDDoS/files/proxies/*
+rm -rf ./MHDDoS
+git clone https://github.com/Nyobir/MHDDoS.git;
 # Updating dependencies
 pip3 install -r ./MHDDoS/requirements.txt;
 
