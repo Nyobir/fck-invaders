@@ -21,6 +21,9 @@ echo "Already the latest version."
 
 if [ -s "$SCRIPT_DIR/username.txt" ]; then
     USER=$(<"$SCRIPT_DIR/username.txt")
+    if [ -z "$USER" ]; then
+        USER=root
+    fi
     export USER
 else
   export USER='root'
