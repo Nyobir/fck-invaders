@@ -33,9 +33,10 @@ touch -a "$SCRIPT_DIR/hosts.txt"
 export DIALOGRC="$SCRIPT_DIR/.dialogrc"
 
 while : ; do
-    MENU_OPTION=$(dialog --title 'Botnet' --menu --stdout "Before the start populate your hosts.txt file!" 20 65 9  \
+    MENU_OPTION=$(dialog --title 'Botnet' --menu --stdout "Before the start populate your hosts.txt file!" 24 65 10  \
     1 'Botnet attack on host' 2 'Bandwidth monitoring' 3 'Show current attacks' 4 'Stop all botnet attacks' \
-    5 'Stop certain host/ip attack in botnet' 6 'Setup/Update SSH hosts' 7 'Change default SSH user' 8 'Cloud providers' 9 'Exit')
+    5 'Stop certain host/ip attack in botnet' 6 'Cleanup proxies' 7 'Setup/Update SSH hosts' \
+    8 'Change default SSH user' 9 'Cloud providers' 10 'Exit')
 
     case $MENU_OPTION in
 
@@ -89,12 +90,23 @@ while : ; do
         continue
         ;;
 
-    6) #Setup SSH hosts
+    6) #Clear proxies list
+        clear
+        if dialog --title "Setup SSH hosts" --stdout --yesno "Following command will cleanup your proxies list\nAll current attacks will be stopped\n                    Do you want to proceed?" 7 65; then
+            bash "$SCRIPT_DIR/rpce.sh" "killall screen"
+            bash "$SCRIPT_DIR/rpce.sh" "rm -f ~/MHDDoS/files/proxies/*"
+            dialog --title "Ok" --msgbox "Proxies list clear" 6 50
+        fi
+
+        continue
+        ;;
+
+    7) #Setup SSH hosts
         bash "$SCRIPT_DIR/setup_hosts.sh"
         continue
         ;;
 
-    7) #Change default username
+    8) #Change default username
         USER=$(bash "$SCRIPT_DIR/menus/username.sh")
         echo "$USER" > "$SCRIPT_DIR/username.txt"
         export USER
@@ -102,7 +114,7 @@ while : ; do
         continue
         ;;
 
-    8)
+    9) # Cloud providers
         MENU_OPTION=$(dialog --title 'Cloud providers' --menu --stdout "Choose option:" 15 55 2 1 'Digital Ocean' 2 'Back')
         case $MENU_OPTION in
 
