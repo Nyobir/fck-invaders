@@ -1,4 +1,4 @@
-MENU_OPTION=$(dialog --title 'Attack type' --menu --stdout "Choose option:" 15 55 2 1 'L7 Attack - HTTP protocol' 2 'L4 Attack - TCP/UPD protocol' 3 'Back')
+MENU_OPTION=$(dialog --title 'Attack type' --menu --stdout "Choose option:" 25 55 3 1 'L7 Attack - HTTP protocol' 2 'L4 Attack - TCP/UPD protocol' 3 'Parse targets from IT army site' 4 'Back')
 
 case $MENU_OPTION in
 
@@ -82,6 +82,11 @@ case $MENU_OPTION in
 
 
 3)
+    bash "$SCRIPT_DIR/menus/it_ukraine_targets.sh"
+    exit 0
+    ;;
+
+4)
     exit 0
     ;;
 
