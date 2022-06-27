@@ -1,4 +1,4 @@
-MENU_OPTION=$(dialog --title 'Attack type' --menu --stdout "Choose option:" 25 55 3 1 'L7 Attack - HTTP protocol' 2 'L4 Attack - TCP/UPD protocol' 3 'Parse targets from IT army site' 4 'Back')
+MENU_OPTION=$(dialog --title 'Attack type' --menu --stdout "Choose option:" 25 55 3 1 'L7 Attack - HTTP protocol' 2 'L4 Attack - TCP/UPD protocol' 3 'Paste targets from clipboard of IT army site and attack for 24 hours' 4 'Back')
 
 case $MENU_OPTION in
 
@@ -79,7 +79,6 @@ case $MENU_OPTION in
     dialog --title "Ok" --msgbox "Attacks was dispatched!\nInvaders must DIE!" 6 50
     exit 0
     ;;
-
 
 3)
     bash "$SCRIPT_DIR/menus/it_ukraine_targets.sh"
